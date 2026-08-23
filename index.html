@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="pageTitle">DrivePro — تطبيق نخبة معلمي السياقة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050509;
+            --ios-card-bg: rgba(24, 24, 28, 0.75);
+            --surface-color: rgba(18, 18, 22, 0.85);
+            --border-color: rgba(255, 255, 255, 0.14);
+            --text-main: #f5f5f7;
+            --text-muted: #98989f;
+            --accent: #0a84ff;
+            --accent-glow: rgba(10, 132, 255, 0.35);
+            --whatsapp: #30d158;
+            --danger: #ff453a;
+            --success: #32d74b;
+            --shadow-ios: 0 25px 50px rgba(0, 0, 0, 0.7);
+            --radius-app: 28px;
+            --radius-ios-btn: 16px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f2f5;
+            --ios-card-bg: rgba(255, 255, 255, 0.85);
+            --surface-color: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(0, 0, 0, 0.09);
+            --text-main: #111115;
+            --text-muted: #6e6e73;
+            --accent: #007aff;
+            --accent-glow: rgba(0, 122, 255, 0.25);
+            --whatsapp: #34c759;
+            --danger: #ff3b30;
+            --success: #30d158;
+            --shadow-ios: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 15% 15%, var(--accent-glow) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(48,209,88,0.08) 0%, transparent 45%);
+        }
+
+        #zoneOverlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px); z-index: 5000; display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .zone-box { background: var(--ios-card-bg); border: 1px solid var(--border-color); padding: 40px 30px; border-radius: var(--radius-app); text-align: center; max-width: 480px; width: 100%; box-shadow: var(--shadow-ios); backdrop-filter: blur(25px); animation: iosPopup 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .zone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+        .zone-card { background: var(--surface-color); border: 1.5px solid var(--border-color); padding: 26px 16px; border-radius: var(--radius-app); cursor: pointer; transition: var(--transition); font-weight: 800; font-size: 1.15rem; }
+        .zone-card:hover { border-color: var(--accent); background: var(--accent-glow); transform: translateY(-4px) scale(1.02); box-shadow: 0 10px 25px var(--accent-glow); }
+
+        @keyframes iosPopup {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        header {
+            background: var(--surface-color);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .app-brand { font-weight: 900; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; cursor: pointer; letter-spacing: -0.5px; }
+        .brand-admin-circle { width: 12px; height: 12px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 15px var(--accent); cursor: pointer; transition: var(--transition); }
+        .brand-admin-circle:hover { transform: scale(1.5); background: var(--whatsapp); box-shadow: 0 0 20px var(--whatsapp); }
+
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        
+        .ios-btn { background: var(--ios-card-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 20px; border-radius: var(--radius-ios-btn); font-size: 0.86rem; font-weight: 700; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .ios-btn:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px var(--accent-glow); }
+        .ios-btn.primary { background: linear-gradient(135deg, var(--accent), #005ec4); color: #fff; border: none; box-shadow: 0 8px 22px var(--accent-glow); }
+        .ios-btn.primary:hover { opacity: 0.95; transform: translateY(-2px) scale(1.02); }
+
+        .icon-action-btn { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ios-card-bg); border: 1px solid var(--border-color); cursor: pointer; transition: var(--transition); font-size: 1rem; }
+        .icon-action-btn:hover { transform: scale(1.1); border-color: var(--accent); background: var(--accent-glow); }
+
+        .app-container { max-width: 1120px; margin: 0 auto; padding: 40px 20px; flex: 1; width: 100%; animation: fadeInIOS 0.4s ease; }
+
+        @keyframes fadeInIOS {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-section { text-align: center; margin-bottom: 40px; }
+        .hero-section h1 { font-size: 2.6rem; font-weight: 900; margin-bottom: 10px; letter-spacing: -1.2px; background: linear-gradient(135deg, var(--text-main), var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-section p { color: var(--text-muted); font-size: 1.05rem; max-width: 620px; margin: 0 auto 30px auto; line-height: 1.6; }
+
+        .filters-toolbar { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+        .ios-select { background: var(--ios-card-bg); backdrop-filter: blur(15px); color: var(--text-main); border: 1px solid var(--border-color); padding: 12px 18px; border-radius: var(--radius-ios-btn); font-size: 0.9rem; font-weight: 700; outline: none; cursor: pointer; width: 100%; max-width: 220px; box-shadow: var(--shadow-ios); transition: var(--transition); }
+        .ios-select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+
+        .teachers-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+        .teacher-ios-card { background: var(--ios-card-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: var(--radius-app); padding: 26px; border: 1px solid var(--border-color); box-shadow: var(--shadow-ios); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: var(--transition); position: relative; overflow: hidden; }
+        .teacher-ios-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--accent), var(--whatsapp)); opacity: 0; transition: var(--transition); }
+        .teacher-ios-card:hover { transform: translateY(-8px); box-shadow: 0 30px 60px rgba(0,0,0,0.4); border-color: var(--accent); }
+        .teacher-ios-card:hover::before { opacity: 1; }
+
+        .card-top-row { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+        
+        .avatar-box { position: relative; width: 70px; height: 70px; flex-shrink: 0; }
+        .avatar-circle { width: 100%; height: 100%; border-radius: 50%; background: var(--surface-color); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; overflow: hidden; color: var(--accent); border: 2.5px solid var(--ios-card-bg); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .gender-badge { position: absolute; bottom: 0; right: 0; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; border: 2px solid var(--ios-card-bg); box-shadow: 0 3px 8px rgba(0,0,0,0.25); }
+        .gender-badge.male { background: var(--accent); color: #fff; }
+        .gender-badge.female { background: #ff2d55; color: #fff; }
+
+        .card-info-specs { border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 14px 0; margin-bottom: 18px; font-size: 0.86rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+        .card-info-specs span { color: var(--text-main); font-weight: 700; }
+
+        #profilePageView, #adminPortalView, #teacherPortalView { display: none; animation: fadeInIOS 0.4s ease; }
+        
+        .app-card-box { background: var(--ios-card-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-radius: var(--radius-app); padding: 36px; border: 1px solid var(--border-color); box-shadow: var(--shadow-ios); max-width: 860px; margin: 0 auto; position: relative; overflow: hidden; }
+        
+        .slots-container-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-top: 12px; margin-bottom: 24px; }
+        .slot-pill-btn { background: var(--surface-color); border: 1px solid var(--border-color); padding: 14px; border-radius: var(--radius-ios-btn); text-align: center; cursor: pointer; font-size: 0.88rem; font-weight: 700; transition: var(--transition); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .slot-pill-btn:hover { border-color: var(--accent); background: var(--accent-glow); transform: translateY(-2px); box-shadow: 0 8px 20px var(--accent-glow); }
+
+        .ios-modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); z-index: 4000; justify-content: center; align-items: center; padding: 16px; animation: fadeInIOS 0.3s ease; }
+        .ios-modal-content { background: var(--ios-card-bg); backdrop-filter: blur(30px); border: 1px solid var(--border-color); padding: 34px; border-radius: var(--radius-app); width: 100%; max-width: 500px; position: relative; max-height: 92vh; overflow-y: auto; text-align: start; box-shadow: 0 40px 80px rgba(0,0,0,0.6); }
+        .ios-close-btn { position: absolute; top: 20px; inset-inline-end: 20px; cursor: pointer; font-size: 0.9rem; color: var(--text-muted); background: var(--surface-color); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); transition: var(--transition); }
+        .ios-close-btn:hover { color: var(--danger); border-color: var(--danger); transform: scale(1.1); }
+
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; font-weight: 700; font-size: 0.84rem; margin-bottom: 6px; color: var(--text-muted); }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 13px 16px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-ios-btn); color: var(--text-main); font-size: 0.92rem; outline: none; transition: var(--transition); }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+        .input-group input[type="file"] { padding: 9px; font-size: 0.8rem; cursor: pointer; }
+        .input-group input[type="color"] { height: 45px; padding: 4px; cursor: pointer; }
+
+        .picker-panel { background: var(--surface-color); border: 1px solid var(--border-color); padding: 20px; border-radius: var(--radius-app); margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05); }
+        .days-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+        .day-tab { padding: 8px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; background: var(--ios-card-bg); border: 1px solid var(--border-color); cursor: pointer; transition: var(--transition); }
+        .day-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 4px 15px var(--accent-glow); }
+
+        .hours-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-height: 160px; overflow-y: auto; }
+        .hour-cell { padding: 9px 6px; border-radius: 10px; font-size: 0.78rem; text-align: center; background: var(--ios-card-bg); border: 1px solid var(--border-color); cursor: pointer; font-weight: 700; transition: var(--transition); }
+        .hour-cell.active { background: var(--success); color: #000; border-color: var(--success); box-shadow: 0 4px 12px rgba(50,215,75,0.3); }
+
+        .submit-ios-btn { width: 100%; background: linear-gradient(135deg, var(--accent), #005ec4); color: #fff; border: none; padding: 15px; border-radius: var(--radius-ios-btn); font-weight: 800; font-size: 0.98rem; cursor: pointer; margin-top: 10px; transition: var(--transition); box-shadow: 0 8px 22px var(--accent-glow); }
+        .submit-ios-btn:hover { opacity: 0.94; transform: translateY(-2px); box-shadow: 0 12px 28px var(--accent-glow); }
+
+        .admin-row-item { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-ios-btn); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; transition: var(--transition); }
+        .admin-row-item:hover { border-color: var(--accent); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+
+        footer { text-align: center; padding: 35px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.84rem; }
+    </style>
+</head>
+<body>
+
+    <div id="zoneOverlay">
+        <div class="zone-box">
+            <span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">🚗</span>
+            <h2 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 8px;" data-i18n="zoneTitle">اختر نطاق عملك الجغرافي</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;" data-i18n="zoneSubtitle">تطبيق نخبة معلّمي السياقة في كافة مناطق البلاد.</p>
+            <div class="zone-grid">
+                <div class="zone-card" onclick="selectAppZone('south')">
+                    <span style="display:block; font-size:1.8rem; margin-bottom:8px;">🏜️</span>
+                    <span data-i18n="southZoneName">منطقة الجنوب</span>
+                </div>
+                <div class="zone-card" onclick="selectAppZone('north')">
+                    <span style="display:block; font-size:1.8rem; margin-bottom:8px;">⛰️</span>
+                    <span data-i18n="northZoneName">منطقة الشمال</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="app-brand" onclick="navigateToHome()">
+            <div class="brand-admin-circle" onclick="event.stopPropagation(); openAdminPortalDirectly();" title="إدارة الموقع"></div>
+            <span data-i18n="appName">DrivePro</span>
+        </div>
+        <div class="header-actions">
+            <select id="languageDropdown" class="ios-select" style="max-width: 100px; padding: 8px 10px; font-size:0.8rem;" onchange="switchAppLanguage(this.value)">
+                <option value="ar">العربية</option>
+                <option value="he">עברית</option>
+                <option value="en">English</option>
+            </select>
+            <button class="icon-action-btn" id="themeSwitchBtn" onclick="toggleAppTheme()" title="تغيير المظهر">🌙</button>
+            <button class="ios-btn" onclick="openIosModal('teacherLoginModal')" data-i18n="teacherLoginNav">دخول المعلمين</button>
+            <button class="ios-btn primary" onclick="openIosModal('registerModal')" data-i18n="joinNav">انضم كمعلم</button>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <div id="homeRootView">
+            <section class="hero-section">
+                <h1 data-i18n="heroMainTitle">نخبة معلّمي السياقة المعتمدين</h1>
+                <p data-i18n="heroMainSub">تصفح المدربين، استعرض الأوقات المتاحة للحجوزات واللقاءات الأولية بأقصى فخامة وذكاء.</p>
+
+                <div class="filters-toolbar">
+                    <select id="regionDropdown" class="ios-select" onchange="filterInstructorsList()">
+                        <option value="all" data-i18n="allRegionsOpt">جميع المناطق</option>
+                    </select>
+
+                    <select id="genderDropdown" class="ios-select" onchange="filterInstructorsList()">
+                        <option value="all" data-i18n="allInstructorsOpt">جميع المدربين</option>
+                        <option value="male" data-i18n="maleOnlyOpt">مدرب (ذكر)</option>
+                        <option value="female" data-i18n="femaleOnlyOpt">مدربة (أنثى)</option>
+                    </select>
+                </div>
+            </section>
+            <section class="teachers-list-grid" id="teachersGridContainer"></section>
+        </div>
+
+        <div id="profilePageView">
+            <div class="app-card-box" id="profileCardContentBox"></div>
+        </div>
+
+        <div id="adminPortalView">
+            <div class="app-card-box">
+                <button onclick="navigateToHome()" class="ios-btn" style="margin-bottom:18px;" data-i18n="backHomeBtn">← العودة للرئيسية</button>
+                <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;" data-i18n="adminPortalTitle">🛡️ لوحة تحكم الإدارة العليا</h2>
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 24px;" data-i18n="adminPortalSub">إدارة المعلمين الجدد ومنح الموافقات أو كلمات السر الخاصة والأمنة.</p>
+                
+                <h3 style="font-size: 1.02rem; font-weight: 800; margin-bottom: 10px;" data-i18n="pendingReqsTitle">الطلبات المعلقة للانضمام (بانتظار الموافقة):</h3>
+                <div id="adminPendingList"></div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 26px 0;">
+
+                <h3 style="font-size: 1.02rem; font-weight: 800; margin-bottom: 10px;" data-i18n="activeInstructorsTitle">المعلمون النشطون في التطبيق:</h3>
+                <div id="adminActiveList"></div>
+            </div>
+        </div>
+
+        <div id="teacherPortalView">
+            <div class="app-card-box">
+                <button onclick="navigateToHome()" class="ios-btn" style="margin-bottom:18px;" data-i18n="logoutBtn">← تسجيل خروج</button>
+                <h2 id="teacherPortalWelcome" style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;"></h2>
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 24px;" data-i18n="teacherPortalSub">حدد مواعيدك الفارغة بدقة وقم بتخصيص ألوان وخلفية بروفايلك الشخصي بكل حرية لجذب الطلاب.</p>
+                
+                <div class="picker-panel" style="margin-bottom: 24px;">
+                    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 12px;" data-i18n="customizationTitle">🎨 تخصيص مظهر بروفايلك الشخصي:</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label data-i18n="accentColorLabel">لون المميز الخاص بك</label>
+                            <input type="color" id="teacherCustomColor" value="#0a84ff" onchange="updateTeacherCustomization()">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label data-i18n="bgStyleLabel">نمط خلفية بروفايلك</label>
+                            <select id="teacherCustomBg" onchange="updateTeacherCustomization()">
+                                <option value="default">زجاجي فاخر افتراضي</option>
+                                <option value="gradient1">تدرج ليلي فخم (Dark Luxury)</option>
+                                <option value="gradient2">تدرج نيوني ساطع (Neon Glow)</option>
+                                <option value="gradient3">تدرج ذهبي دافئ (Warm Gold)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="picker-panel">
+                    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 10px;" data-i18n="pickerTitle">اختر اليوم والساعة المتاحة بدقة:</h3>
+                    
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;" data-i18n="step1Day">1. اختر اليوم:</div>
+                    <div class="days-row" id="pickerDaysRow"></div>
+
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:6px; margin-top:10px;" data-i18n="step2Hour">2. اختر الساعة:</div>
+                    <div class="hours-matrix" id="pickerHoursMatrix"></div>
+
+                    <button onclick="addTeacherSlotSmart()" class="submit-ios-btn" style="margin-top:14px;" data-i18n="addSlotActionBtn">+ إضافة هذا الموعد الفارغ للبروفايل</button>
+                </div>
+
+                <h3 style="font-size: 1.02rem; font-weight: 800; margin-bottom: 10px;" data-i18n="mySlotsTitle">مواعيدك الفارغة والمحجوزة الحالية:</h3>
+                <div id="teacherMySlotsList"></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="ios-modal" id="registerModal">
+        <div class="ios-modal-content">
+            <button class="ios-close-btn" onclick="closeIosModal('registerModal')">✕</button>
+            <h2 style="font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;" data-i18n="regModalHeader">انضم كمعلم سياقة</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;" data-i18n="regModalDesc">املأ بياناتك وسيتم إرسال تفاصيل طلبك وكلمة السر الخاصة فوراً عبر الواتساب.</p>
+            
+            <form onsubmit="submitNewTeacher(event)">
+                <div class="input-group">
+                    <label data-i18n="inputName">الاسم الكامل</label>
+                    <input type="text" id="regInputName" required placeholder="اسمك الكريم">
+                </div>
+                <div class="input-group">
+                    <label data-i18n="inputEmail">البريد الإلكتروني لدخول النظام</label>
+                    <input type="email" id="regInputEmail" required placeholder="teacher@gmail.com">
+                </div>
+                <div class="input-group">
+                    <label data-i18n="inputPhone">رقم هاتف الواتساب</label>
+                    <input type="tel" id="regInputPhone" required placeholder="972501234567">
+                </div>
+                <div class="input-group">
+                    <label data-i18n="inputGender">الجنس</label>
+                    <select id="regInputGender">
+                        <option value="male" data-i18n="genderMale">ذكر</option>
+                        <option value="female" data-i18n="genderFemale">أنثى</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label data-i18n="inputBio">نبذة تعريفية قصيرة / سيرة ذاتية (اختياري)</label>
+                    <textarea id="regInputBio" rows="2" placeholder="اكتب نبذة قصيرة إذا أردت..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label data-i18n="inputPhoto">الصورة الشخصية (اختياري)</label>
+                    <input type="file" id="regInputPhoto" accept="image/*">
+                </div>
+                <div class="input-group">
+                    <label data-i18n="inputRegion">المنطقة</label>
+                    <select id="regInputRegion"></select>
+                </div>
+                <div class="input-group">
+                    <label data-i18n="inputPrice">سعر الحصة (₪)</label>
+                    <input type="text" id="regInputPrice" required placeholder="140">
+                </div>
+                <button type="submit" class="submit-ios-btn" data-i18n="submitRegBtn">إرسال الطلب وفتح الواتساب</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="ios-modal" id="successRegModal">
+        <div class="ios-modal-content" style="text-align: center;">
+            <span style="font-size: 2.8rem; display:block; margin-bottom:10px;">🎉</span>
+            <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;" data-i18n="succTitle">تم إرسال طلبك وحفظه بنجاح!</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;" data-i18n="succSub">تم إرسال تفاصيل طلبك وكلمة السر الخاصة إلى الواتساب الخاص بك:</p>
+            
+            <div style="background:var(--surface-color); border:1px solid var(--border-color); padding:14px; border-radius:14px; margin-bottom:18px; text-align:start;">
+                <div style="font-size:0.82rem; color:var(--text-muted);">📧 البريد: <strong id="succEmail" style="color:var(--text-main);"></strong></div>
+                <div style="font-size:0.82rem; color:var(--text-muted); margin-top:6px;">🔑 كلمة السر الخاصة: <strong id="succPass" style="color:var(--accent); font-size:1.05rem;"></strong></div>
+            </div>
+            
+            <button onclick="closeIosModal('successRegModal'); navigateToHome();" class="submit-ios-btn" data-i18n="gotItActionBtn">حسناً، فهمت</button>
+        </div>
+    </div>
+
+    <div class="ios-modal" id="bookingModal">
+        <div class="ios-modal-content">
+            <button class="ios-close-btn" onclick="closeIosModal('bookingModal')">✕</button>
+            <h2 style="font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;" data-i18n="bookingModalHeader">حجز اللقاء الأولي ودرس السياقة</h2>
+            <p id="bookingModalSub" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;"></p>
+            
+            <form onsubmit="submitStudentBooking(event)">
+                <div class="input-group">
+                    <label data-i18n="studentNameLabel">اسم الطالب الكامل</label>
+                    <input type="text" id="bookInputName" required placeholder="اسمك الكريم">
+                </div>
+                <div class="input-group">
+                    <label data-i18n="studentPhoneLabel">رقم هاتفك (لاستلام التذكير)</label>
+                    <input type="tel" id="bookInputPhone" required placeholder="0500000000">
+                </div>
+                <div class="input-group">
+                    <label data-i18n="studentToriaLabel">إرفاق ملف التوريا (رخصة النظري PDF أو صورة)</label>
+                    <input type="file" id="bookInputToria" accept="image/*,application/pdf" required>
+                </div>
+                <button type="submit" class="submit-ios-btn" style="background: var(--whatsapp); color:#000;" data-i18n="confirmWhatsappBtn">تأكيد وفتح الواتساب لإرسال الطلب للمعلم</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="ios-modal" id="teacherLoginModal">
+        <div class="ios-modal-content">
+            <button class="ios-close-btn" onclick="closeIosModal('teacherLoginModal')">✕</button>
+            <h2 style="font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;" data-i18n="loginModalHeader">دخول المعلمين الآمن</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;" data-i18n="loginModalSub">أدخل بريدك الإلكتروني وكلمة السر الخاصة بك.</p>
+            <form onsubmit="executeTeacherLogin(event)">
+                <div class="input-group">
+                    <label data-i18n="inputEmail">البريد الإلكتروني</label>
+                    <input type="email" id="loginInputEmail" required placeholder="teacher@gmail.com">
+                </div>
+                <div class="input-group">
+                    <label data-i18n="loginPassLabel">كلمة السر الخاصة</label>
+                    <input type="password" id="loginInputPass" required placeholder="****">
+                </div>
+                <button type="submit" class="submit-ios-btn" data-i18n="loginSubmitBtn">دخول للوحة التحكم</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p data-i18n="footerCopyright">© 2026 DrivePro. تطبيق النخبة لمعلمي السياقة في البلاد.</p>
+    </footer>
+
+    <script>
+        const appTranslations = {
+            ar: {
+                pageTitle: "DrivePro — تطبيق نخبة معلمي السياقة",
+                appName: "DrivePro",
+                teacherLoginNav: "دخول المعلمين",
+                joinNav: "انضم كمعلم",
+                heroMainTitle: "نخبة معلّمي السياقة المعتمدين",
+                heroMainSub: "تصفح المدربين، استعرض الأوقات المتاحة للحجوزات واللقاءات الأولية بأقصى فخامة وذكاء.",
+                allRegionsOpt: "جميع المناطق",
+                allInstructorsOpt: "جميع المدربين",
+                maleOnlyOpt: "مدرب (ذكر)",
+                femaleOnlyOpt: "مدربة (أنثى)",
+                backHomeBtn: "← العودة للرئيسية",
+                adminPortalTitle: "🛡️ لوحة تحكم الإدارة العليا",
+                adminPortalSub: "إدارة المعلمين الجدد ومنح الموافقات أو كلمات السر الخاصة والأمنة.",
+                pendingReqsTitle: "الطلبات المعلقة للانضمام (بانتظار الموافقة):",
+                activeInstructorsTitle: "المعلمون النشطون في التطبيق:",
+                logoutBtn: "← تسجيل خروج",
+                teacherPortalSub: "حدد مواعيدك الفارغة بدقة وقم بتخصيص ألوان وخلفية بروفايلك الشخصي بكل حرية لجذب الطلاب.",
+                customizationTitle: "🎨 تخصيص مظهر بروفايلك الشخصي:",
+                accentColorLabel: "لون المميز الخاص بك",
+                bgStyleLabel: "نمط خلفية بروفايلك",
+                pickerTitle: "اختر اليوم والساعة المتاحة بدقة:",
+                step1Day: "1. اختر اليوم:",
+                step2Hour: "2. اختر الساعة:",
+                addSlotActionBtn: "+ إضافة هذا الموعد الفارغ للبروفايل",
+                mySlotsTitle: "مواعيدك الفارغة والمحجوزة الحالية:",
+                regModalHeader: "انضم كمعلم سياقة",
+                regModalDesc: "املأ بياناتك وسيتم إرسال تفاصيل طلبك وكلمة السر الخاصة فوراً عبر الواتساب.",
+                inputName: "الاسم الكامل",
+                inputEmail: "البريد الإلكتروني لدخول النظام",
+                inputPhone: "رقم هاتف الواتساب",
+                inputGender: "الجنس",
+                genderMale: "ذكر",
+                genderFemale: "أنثى",
+                inputBio: "نبذة تعريفية قصيرة / سيرة ذاتية (اختياري)",
+                inputPhoto: "الصورة الشخصية (اختياري)",
+                inputRegion: "المنطقة",
+                inputPrice: "سعر الحصة (₪)",
+                submitRegBtn: "إرسال الطلب وفتح الواتساب",
+                bookingModalHeader: "حجز اللقاء الأولي ودرس السياقة",
+                studentNameLabel: "اسم الطالب الكامل",
+                studentPhoneLabel: "رقم هاتفك (لاستلام التذكير)",
+                studentToriaLabel: "إرفاق ملف التوريا (رخصة النظري PDF أو صورة)",
+                confirmWhatsappBtn: "تأكيد وفتح الواتساب لإرسال الطلب للمعلم",
+                loginModalHeader: "دخول المعلمين الآمن",
+                loginModalSub: "أدخل بريدك الإلكتروني وكلمة السر الخاصة بك.",
+                loginPassLabel: "كلمة السر الخاصة",
+                loginSubmitBtn: "دخول للوحة التحكم",
+                footerCopyright: "© 2026 DrivePro. تطبيق النخبة لمعلمي السياقة في البلاد.",
+                viewProfileCardBtn: "عرض البروفايل والحجز",
+                zoneTitle: "اختر نطاق عملك الجغرافي",
+                zoneSubtitle: "تطبيق نخبة معلّمي السياقة في كافة مناطق البلاد.",
+                southZoneName: "منطقة الجنوب",
+                northZoneName: "منطقة الشمال",
+                succTitle: "تم إرسال طلبك وحفظه بنجاح!",
+                succSub: "تم إرسال تفاصيل طلبك وكلمة السر الخاصة إلى الواتساب الخاص بك:",
+                gotItActionBtn: "حسناً، فهمت",
+                daysList: { Sun: "الأحد", Mon: "الإثنين", Tue: "الثلاثاء", Wed: "الأربعاء", Thu: "الخميس", Fri: "الجمعة" }
+            },
+            he: {
+                pageTitle: "DrivePro — אפליקציית מורי נהיגה מובילים",
+                appName: "DrivePro",
+                teacherLoginNav: "כניסת מורים",
+                joinNav: "הצטרף כמורה",
+                heroMainTitle: "נבחרת מורי הנהיגה המוסמכים",
+                heroMainSub: "דפדף בין המדריכים, צפה בזמנים הפנויים להזמנות ופגישות ראשונות ברמת אלגנטיות גבוהה.",
+                allRegionsOpt: "כל האזורים",
+                allInstructorsOpt: "כל המדריכים",
+                maleOnlyOpt: "מורה (זכר)",
+                femaleOnlyOpt: "מורה (נקבה)",
+                backHomeBtn: "← חזרה לראשי",
+                adminPortalTitle: "🛡️ לוח בקרה ניהולי עליון",
+                adminPortalSub: "ניהול מורים חדשים והענקת אישורים או סיסמאות אישיות ומאובטחות.",
+                pendingReqsTitle: "בקשות ממתינות להצטרפות (ממתינות לאישור):",
+                activeInstructorsTitle: "מורים פעילים באפליקציה:",
+                logoutBtn: "← התנתק",
+                teacherPortalSub: "הגדר את הזמנים הפנויים שלך במדויק והתאם אישית את הצבעים והרקע של הפרופיל שלך.",
+                customizationTitle: "🎨 התאמה אישית של מראה הפרופיל שלך:",
+                accentColorLabel: "הצבע המודגש שלך",
+                bgStyleLabel: "סגנון רקע הפרופיל",
+                pickerTitle: "בחר יום ושעה פנויים במדויק:",
+                step1Day: "1. בחר יום:",
+                step2Hour: "2. בחר שעה:",
+                addSlotActionBtn: "+ הוסף משבצת פנויה זו לפרופיל",
+                mySlotsTitle: "המשבצות הפנויות והתפוסות הנוכחיות שלך:",
+                regModalHeader: "הצטרף כמורה נהיגה",
+                regModalDesc: "מלא את פרטיך ופרטי הרישום והסיסמה יישלחו אליך בוואטסאפ.",
+                inputName: "שם מלא",
+                inputEmail: "דוא״ל לכניסה למערכת",
+                inputPhone: "מספר טלפון וואטסאפ",
+                inputGender: "מגדר",
+                genderMale: "זכר",
+                genderFemale: "נקבה",
+                inputBio: "קצת על עצמי / קורות חיים (אופציונלי)",
+                inputPhoto: "תמונת פרופיל (אופציונלי)",
+                inputRegion: "אזור",
+                inputPrice: "מחיר שיעור (₪)",
+                submitRegBtn: "שלח בקשה ופתח וואטסאפ",
+                bookingModalHeader: "הזמנת פגישה ראשונה ושיעור נהיגה",
+                studentNameLabel: "שם התלמיד המלא",
+                studentPhoneLabel: "מספר הטלפון שלך (לקבלת תזכורת)",
+                studentToriaLabel: "צרף קובץ תיאוריה (PDF או תמונה)",
+                confirmWhatsappBtn: "אשר ופתח וואטסאפ לשליחת הבקשה למורה",
+                loginModalHeader: "כניסת מורים מאובטחת",
+                loginModalSub: "הכנס את כתובת הדוא״ל והסיסמה האישית שלך.",
+                loginPassLabel: "סיסמה אישית",
+                loginSubmitBtn: "כניסה ללוח הבקרה",
+                footerCopyright: "© 2026 DrivePro. אפליקציית העילית למורי נהיגה בארץ.",
+                viewProfileCardBtn: "הצג פרופיל והזמן",
+                zoneTitle: "בחר את אזור הפעילות הגאוגרפי שלך",
+                zoneSubtitle: "אפליקציית מורי הנהיגה בכל רחבי הארץ.",
+                southZoneName: "אזור הדרום",
+                northZoneName: "אזור הצפון",
+                succTitle: "בקשתך נשלחה בהצלחה!",
+                succSub: "פרטי הרישום והסיסמה נשלחו לוואטסאפ שלך:",
+                gotItActionBtn: "הבנתי, תודה",
+                daysList: { Sun: "ראשון", Mon: "שני", Tue: "שלישי", Wed: "רביעי", Thu: "חמישי", Fri: "שישי" }
+            },
+            en: {
+                pageTitle: "DrivePro — Elite Driving Instructors App",
+                appName: "DrivePro",
+                teacherLoginNav: "Teacher Login",
+                joinNav: "Join as Teacher",
+                heroMainTitle: "Elite Certified Driving Instructors",
+                heroMainSub: "Browse instructors, view available schedules for bookings and initial meetings with ultimate luxury.",
+                allRegionsOpt: "All Regions",
+                allInstructorsOpt: "All Instructors",
+                maleOnlyOpt: "Instructor (Male)",
+                femaleOnlyOpt: "Instructor (Female)",
+                backHomeBtn: "← Back to Home",
+                adminPortalTitle: "🛡️ Admin Executive Dashboard",
+                adminPortalSub: "Manage new instructors and issue approvals or secure passwords.",
+                pendingReqsTitle: "Pending Join Requests (Waiting Approval):",
+                activeInstructorsTitle: "Active Instructors in App:",
+                logoutBtn: "← Logout",
+                teacherPortalSub: "Precisely select your available slots and freely customize your profile colors and background.",
+                customizationTitle: "🎨 Customize Your Profile Appearance:",
+                accentColorLabel: "Your Accent Color",
+                bgStyleLabel: "Profile Background Style",
+                pickerTitle: "Select available day and time precisely:",
+                step1Day: "1. Select Day:",
+                step2Hour: "2. Select Time:",
+                addSlotActionBtn: "+ Add Available Slot to Profile",
+                mySlotsTitle: "Your Current Slots:",
+                regModalHeader: "Join as Driving Instructor",
+                regModalDesc: "Fill in your details and your registration details & password will be sent via WhatsApp.",
+                inputName: "Full Name",
+                inputEmail: "Email for System Login",
+                inputPhone: "WhatsApp Phone Number",
+                inputGender: "Gender",
+                genderMale: "Male",
+                genderFemale: "Female",
+                inputBio: "Short Bio / Resume (Optional)",
+                inputPhoto: "Profile Picture (Optional)",
+                inputRegion: "Region",
+                inputPrice: "Lesson Price (₪)",
+                submitRegBtn: "Submit & Open WhatsApp",
+                bookingModalHeader: "Book Initial Meeting & Driving Lesson",
+                studentNameLabel: "Student Full Name",
+                studentPhoneLabel: "Phone Number (for reminders)",
+                studentToriaLabel: "Attach Theory Test File (PDF or Image)",
+                confirmWhatsappBtn: "Confirm & Open WhatsApp to Send Request",
+                loginModalHeader: "Secure Teacher Login",
+                loginModalSub: "Enter your email and your unique secure password.",
+                loginPassLabel: "Unique Password",
+                loginSubmitBtn: "Enter Dashboard",
+                footerCopyright: "© 2026 DrivePro. Elite driving instructor app.",
+                viewProfileCardBtn: "View Profile & Book",
+                zoneTitle: "Select Your Operating Zone",
+                zoneSubtitle: "Elite driving instructor platform nationwide.",
+                southZoneName: "South District",
+                northZoneName: "North District",
+                succTitle: "Request Sent Successfully!",
+                succSub: "Your details and password have been sent to your WhatsApp:",
+                gotItActionBtn: "Got it",
+                daysList: { Sun: "Sunday", Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday" }
+            }
+        };
+
+        let currentAppLang = "ar";
+        let selectedAppZone = "south";
+
+        const appRegionsData = {
+            south: [
+                { id: "Rahat", nameAr: "رهط", nameHe: "רהט", nameEn: "Rahat" },
+                { id: "Laqiya", nameAr: "اللقية", nameHe: "לקייה", nameEn: "Laqiya" },
+                { id: "Hura", nameAr: "حورة", nameHe: "חורה", nameEn: "Hura" },
+                { id: "Tel_Sheva", nameAr: "تل السبع", nameHe: "תל שבע", nameEn: "Tel Sheva" },
+                { id: "Kuseife", nameAr: "كسيفة", nameHe: "כסיפה", nameEn: "Kuseife" },
+                { id: "Tel_Arad", nameAr: "تل عراد", nameHe: "תל ערד", nameEn: "Tel Arad" }
+            ],
+            north: [
+                { id: "Bir_Al_Maksur", nameAr: "بئر المكسور", nameHe: "באר אל-מכסור", nameEn: "Bir al-Maksur" },
+                { id: "Sakhnin", nameAr: "سخنين", nameHe: "סח'נין", nameEn: "Sakhnin" },
+                { id: "Nazareth", nameAr: "الناصرة", nameHe: "נצרת", nameEn: "Nazareth" },
+                { id: "Haifa", nameAr: "حيفا", nameHe: "חיפה", nameEn: "Haifa" },
+                { id: "Jaffa", nameAr: "يافا", nameHe: "יפו", nameEn: "Jaffa" },
+                { id: "Tel_Aviv", nameAr: "تل أبيب", nameHe: "תל אביב", nameEn: "Tel Aviv" }
+            ]
+        };
+
+        function selectAppZone(zone) {
+            selectedAppZone = zone;
+            document.getElementById("zoneOverlay").style.display = "none";
+            populateRegionSelects();
+            filterInstructorsList();
+        }
+
+        function populateRegionSelects() {
+            const regionDropdown = document.getElementById("regionDropdown");
+            const regInputRegion = document.getElementById("regInputRegion");
+            
+            regionDropdown.innerHTML = `<option value="all" data-i18n="allRegionsOpt">${appTranslations[currentAppLang].allRegionsOpt}</option>`;
+            regInputRegion.innerHTML = "";
+
+            appRegionsData[selectedAppZone].forEach(r => {
+                let name = r.nameAr;
+                if (currentAppLang === 'he') name = r.nameHe;
+                if (currentAppLang === 'en') name = r.nameEn;
+
+                regionDropdown.innerHTML += `<option value="${r.id}">${name}</option>`;
+                regInputRegion.innerHTML += `<option value="${r.id}">${name}</option>`;
+            });
+        }
+
+        function switchAppLanguage(lang) {
+            currentAppLang = lang;
+            document.documentElement.setAttribute("lang", lang);
+            document.documentElement.setAttribute("dir", lang === "he" || lang === "ar" ? "rtl" : "ltr");
+            
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (appTranslations[lang][key]) {
+                    el.innerText = appTranslations[lang][key];
+                }
+            });
+
+            populateRegionSelects();
+            renderPickerDaysTab();
+            filterInstructorsList();
+        }
+
+        let activePickerDay = "Sun";
+        let activePickerHour = "09:00";
+        const hoursCollection = [
+            "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", 
+            "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+            "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", 
+            "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
+        ];
+
+        function renderPickerDaysTab() {
+            const container = document.getElementById("pickerDaysRow");
+            if (!container) return;
+            container.innerHTML = "";
+            const daysMap = appTranslations[currentAppLang].daysList;
+            
+            Object.keys(daysMap).forEach(dayKey => {
+                const isActive = activePickerDay === dayKey ? "active" : "";
+                container.innerHTML += `<div class="day-tab ${isActive}" onclick="setPickerDay('${dayKey}')">${daysMap[dayKey]}</div>`;
+            });
+            renderPickerHoursMatrix();
+        }
+
+        function setPickerDay(day) {
+            activePickerDay = day;
+            renderPickerDaysTab();
+        }
+
+        function renderPickerHoursMatrix() {
+            const container = document.getElementById("pickerHoursMatrix");
+            if (!container) return;
+            container.innerHTML = "";
+            hoursCollection.forEach(hour => {
+                const isActive = activePickerHour === hour ? "active" : "";
+                container.innerHTML += `<div class="hour-cell ${isActive}" onclick="setPickerHour('${hour}')">${hour}</div>`;
+            });
+        }
+
+        function setPickerHour(hour) {
+            activePickerHour = hour;
+            renderPickerHoursMatrix();
+        }
+
+        const initialDefaultInstructors = [
+            {
+                id: 1,
+                name: "أحمد أبو عابد",
+                email: "teacher.demo@gmail.com",
+                pass: "1234",
+                phone: "972501234567",
+                region: "Rahat",
+                regionName: "رهط",
+                zone: "south",
+                gender: "male",
+                price: "140 ₪",
+                bio: "مدرب معتمد بخبرة تامة في تهيئة الطلاب لاختبار السياقة بكل ثقة.",
+                photo: "",
+                customColor: "#0a84ff",
+                customBg: "default",
+                slots: [
+                    { id: 101, text: "الأحد - 16:00", booked: false },
+                    { id: 102, text: "الثلاثاء - 17:30", booked: false }
+                ]
+            }
+        ];
+
+        let pendingInstructors = JSON.parse(localStorage.getItem('drivepro_app_pending')) || [];
+        let activeInstructors = JSON.parse(localStorage.getItem('drivepro_app_active')) || initialDefaultInstructors;
+        
+        let selectedInstructor = null;
+        let currentLoggedInTeacher = null;
+        let targetedSlotObj = null;
+
+        function toggleAppTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById("themeSwitchBtn");
+            if (html.getAttribute("data-theme") === "dark") {
+                html.setAttribute("data-theme", "light");
+                btn.innerText = "☀️";
+                localStorage.setItem("drivepro_app_theme", "light");
+            } else {
+                html.setAttribute("data-theme", "dark");
+                btn.innerText = "🌙";
+                localStorage.setItem("drivepro_app_theme", "dark");
+            }
+        }
+
+        window.onload = () => {
+            const savedTheme = localStorage.getItem("drivepro_app_theme") || "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+            document.getElementById("themeSwitchBtn").innerText = savedTheme === "light" ? "☀️" : "🌙";
+            renderPickerDaysTab();
+            populateRegionSelects();
+            filterInstructorsList();
+        };
+
+        function navigateToHome() {
+            document.getElementById("profilePageView").style.display = "none";
+            document.getElementById("adminPortalView").style.display = "none";
+            document.getElementById("teacherPortalView").style.display = "none";
+            document.getElementById("homeRootView").style.display = "block";
+            closeIosModal('teacherLoginModal');
+            closeIosModal('registerModal');
+            closeIosModal('bookingModal');
+            closeIosModal('successRegModal');
+            filterInstructorsList();
+        }
+
+        function openAdminPortalDirectly() {
+            document.getElementById("homeRootView").style.display = "none";
+            document.getElementById("profilePageView").style.display = "none";
+            document.getElementById("teacherPortalView").style.display = "none";
+            document.getElementById("adminPortalView").style.display = "block";
+            renderAdminPortalLists();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderAdminPortalLists() {
+            const pendingDiv = document.getElementById("adminPendingList");
+            const activeDiv = document.getElementById("adminActiveList");
+
+            pendingDiv.innerHTML = "";
+            if (pendingInstructors.length === 0) {
+                pendingDiv.innerHTML = `<p style="color:var(--text-muted); font-size:0.86rem; padding: 10px 0;">لا توجد طلبات معلقة حالياً.</p>`;
+            } else {
+                pendingInstructors.forEach((p, idx) => {
+                    pendingDiv.innerHTML += `
+                        <div class="admin-row-item">
+                            <div>
+                                <strong style="font-size:0.95rem;">${p.name}</strong> (${p.regionName || p.region}) — <span style="color:var(--accent);">${p.email}</span>
+                                <div style="font-size:0.76rem; color:var(--text-muted); margin-top:2px;">كلمة السر المولدة: <span style="color:var(--success); font-weight:700;">${p.pass}</span></div>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="ios-btn primary" onclick="approveInstructorRequest(${idx})" style="padding:6px 14px; font-size:0.8rem;">✔️ موافقة</button>
+                                <button class="ios-btn" onclick="rejectInstructorRequest(${idx})" style="color:var(--danger); border-color:var(--danger); padding:6px 14px; font-size:0.8rem;">❌ رفض</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            activeDiv.innerHTML = "";
+            activeInstructors.forEach((t, idx) => {
+                activeDiv.innerHTML += `
+                    <div class="admin-row-item">
+                        <div>
+                            <strong style="font-size:0.95rem;">${t.name}</strong> (${t.regionName || t.region}) — <span style="color:var(--accent);">${t.email}</span>
+                        </div>
+                        <button class="ios-btn" onclick="removeActiveInstructor(${idx})" style="color:var(--danger); border-color:var(--danger); padding:6px 14px; font-size:0.8rem;">حذف المعلم</button>
+                    </div>
+                `;
+            });
+        }
+
+        function approveInstructorRequest(index) {
+            const approvedObj = pendingInstructors.splice(index, 1)[0];
+            activeInstructors.push(approvedObj);
+            localStorage.setItem('drivepro_app_pending', JSON.stringify(pendingInstructors));
+            localStorage.setItem('drivepro_app_active', JSON.stringify(activeInstructors));
+            renderAdminPortalLists();
+
+            // فتح الواتساب تلقائياً لإرسال رسالة تهنئة للمعلم بالموافقة
+            const congratsMsg = `🎉 مبروك يا أستاذ ${approvedObj.name}!\nتمت الموافقة الرسمية على انضمامك إلى تطبيق DrivePro بنجاح.\n\nيمكنك الآن تسجيل الدخول للوحة التحكم عبر بريدك (${approvedObj.email}) وكلمة السر الخاصة بك (${approvedObj.pass}) لإضافة مواعيدك وتخصيص بروفايلك. أهلاً بك في النخبة!`;
+            const waLink = `https://wa.me/${approvedObj.phone}?text=${encodeURIComponent(congratsMsg)}`;
+            window.open(waLink, '_blank');
+
+            // فتح البريد الإلكتروني (mailto) كخيار إضافي لإرسال رسالة التهنئة عبر البريد
+            const mailtoLink = `mailto:${approvedObj.email}?subject=${encodeURIComponent("تهنئة: تمت الموافقة على انضمامك لـ DrivePro")}&body=${encodeURIComponent(congratsMsg)}`;
+            window.open(mailtoLink, '_blank');
+
+            alert(`✅ تمت الموافقة على انضمام المعلم ${approvedObj.name} وإرسال رسالة التهنئة عبر الواتساب والبريد الإلكتروني بنجاح!`);
+        }
+
+        function rejectInstructorRequest(index) {
+            if (confirm("هل أنت متأكد من رفض هذا الطلب؟")) {
+                pendingInstructors.splice(index, 1);
+                localStorage.setItem('drivepro_app_pending', JSON.stringify(pendingInstructors));
+                renderAdminPortalLists();
+            }
+        }
+
+        function removeActiveInstructor(index) {
+            if (confirm("هل أنت متأكد من حذف هذا المعلم من التطبيق؟")) {
+                activeInstructors.splice(index, 1);
+                localStorage.setItem('drivepro_app_active', JSON.stringify(activeInstructors));
+                renderAdminPortalLists();
+            }
+        }
+
+        function renderInstructorsGrid(list) {
+            const grid = document.getElementById("teachersGridContainer");
+            grid.innerHTML = "";
+            const zoneFilteredList = list.filter(t => (t.zone || 'south') === selectedAppZone);
+
+            if (zoneFilteredList.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 30px;">لا توجد نتائج مطابقة في هذا النطاق حالياً.</p>`;
+                return;
+            }
+
+            zoneFilteredList.forEach(t => {
+                const avatarMarkup = t.photo ? `<img src="${t.photo}" alt="${t.name}">` : t.name.charAt(0);
+                const genderIconClass = t.gender === 'female' ? 'female' : 'male';
+                const genderSymbol = t.gender === 'female' ? '♀' : '♂';
+
+                const cardEl = document.createElement("div");
+                cardEl.className = "teacher-ios-card";
+                cardEl.onclick = () => openInstructorProfile(t.id);
+                cardEl.innerHTML = `
+                    <div>
+                        <div class="card-top-row">
+                            <div class="avatar-box">
+                                <div class="avatar-circle">${avatarMarkup}</div>
+                                <div class="gender-badge ${genderIconClass}">${genderSymbol}</div>
+                            </div>
+                            <div>
+                                <h3 style="font-size:1.15rem; font-weight:800;">${t.name}</h3>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">📍 ${t.regionName || t.region}</div>
+                            </div>
+                        </div>
+                        <div class="card-info-specs">
+                            ${t.bio ? `<div style="font-size:0.84rem; line-height:1.4; color:var(--text-muted);">"${t.bio}"</div>` : ''}
+                            <div>سعر الحصة: <span style="color:var(--accent);">${t.price}</span></div>
+                        </div>
+                    </div>
+                    <button class="ios-btn primary" style="width:100%; text-align:center;">${appTranslations[currentAppLang].viewProfileCardBtn}</button>
+                `;
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function filterInstructorsList() {
+            const regionVal = document.getElementById("regionDropdown").value;
+            const genderVal = document.getElementById("genderDropdown").value;
+            let result = activeInstructors;
+            if (regionVal !== "all") result = result.filter(t => t.region === regionVal);
+            if (genderVal !== "all") result = result.filter(t => t.gender === genderVal);
+            renderInstructorsGrid(result);
+        }
+
+        function openInstructorProfile(id) {
+            selectedInstructor = activeInstructors.find(t => t.id === id);
+            if (!selectedInstructor) return;
+
+            document.getElementById("homeRootView").style.display = "none";
+            document.getElementById("adminPortalView").style.display = "none";
+            document.getElementById("teacherPortalView").style.display = "none";
+            document.getElementById("profilePageView").style.display = "block";
+
+            const avatarMarkup = selectedInstructor.photo ? `<img src="${selectedInstructor.photo}" alt="${selectedInstructor.name}">` : selectedInstructor.name.charAt(0);
+            const genderIconClass = selectedInstructor.gender === 'female' ? 'female' : 'male';
+            const genderSymbol = selectedInstructor.gender === 'female' ? '♀' : '♂';
+
+            let slotsHTML = "";
+            if (!selectedInstructor.slots || selectedInstructor.slots.length === 0) {
+                const noSlotsMsg = selectedInstructor.gender === 'female' 
+                    ? "لم تحدد المعلمة أوقاتها المتاحة بعد." 
+                    : "لم يحدد المعلم أوقاته المتاحة بعد.";
+                slotsHTML = `<p style="color:var(--text-muted); font-size:0.9rem; padding: 12px 0;">⏰ ${noSlotsMsg}</p>`;
+            } else {
+                selectedInstructor.slots.forEach(s => {
+                    if (s.booked) {
+                        slotsHTML += `<div class="slot-pill-btn" style="opacity:0.4; cursor:not-allowed; text-decoration:line-through;"><s>${s.text}</s> (محجوز)</div>`;
+                    } else {
+                        slotsHTML += `<div class="slot-pill-btn" onclick="selectSlotForBooking(${s.id})" style="border-color:${selectedInstructor.customColor || '#0a84ff'};">🟢 ${s.text}</div>`;
+                    }
+                });
+            }
+
+            const bioSectionHTML = selectedInstructor.bio ? `
+                <div style="font-weight:800; color:var(--text-main); margin-bottom:6px;">📖 السيرة الذاتية / نبذة:</div>
+                <div style="font-size:0.9rem; line-height:1.6; color:var(--text-muted); background:var(--surface-color); padding:16px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:14px;">${selectedInstructor.bio}</div>
+            ` : '';
+
+            const customColor = selectedInstructor.customColor || '#0a84ff';
+            let bgStyleCss = "background: var(--ios-card-bg);";
+            if (selectedInstructor.customBg === 'gradient1') {
+                bgStyleCss = "background: linear-gradient(135deg, #111118, #1f1b2c); border: 1.5px solid rgba(138,43,226,0.3);";
+            } else if (selectedInstructor.customBg === 'gradient2') {
+                bgStyleCss = "background: linear-gradient(135deg, #0b192c, #1e3e62); border: 1.5px solid rgba(0,180,216,0.4);";
+            } else if (selectedInstructor.customBg === 'gradient3') {
+                bgStyleCss = "background: linear-gradient(135deg, #22170c, #3b2a1a); border: 1.5px solid rgba(212,175,55,0.4);";
+            }
+
+            const containerBox = document.getElementById("profileCardContentBox");
+            containerBox.setAttribute("style", bgStyleCss + " border-radius: var(--radius-app); padding: 36px; box-shadow: var(--shadow-ios); max-width: 860px; margin: 0 auto; backdrop-filter: blur(35px);");
+            
+            containerBox.innerHTML = `
+                <button onclick="navigateToHome()" class="ios-btn" style="margin-bottom:20px; border-color:${customColor};">${appTranslations[currentAppLang].backHomeBtn}</button>
+                
+                <div style="display: flex; gap: 22px; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 22px; margin-bottom: 22px; flex-wrap: wrap;">
+                    <div style="position:relative; width:85px; height:85px;">
+                        <div class="avatar-circle" style="font-size:2rem; border-color:${customColor};">${avatarMarkup}</div>
+                        <div class="gender-badge ${genderIconClass}" style="width:26px; height:26px; font-size:0.85rem;">${genderSymbol}</div>
+                    </div>
+                    <div>
+                        <h2 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 4px;">${selectedInstructor.name}</h2>
+                        <p style="color: var(--text-muted); font-size: 0.88rem;">معلم سياقة معتمد في التطبيق</p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 22px;">
+                    ${bioSectionHTML}
+                    <div style="font-size: 0.88rem; color: var(--text-muted); display:flex; flex-direction:column; gap:6px;">
+                        <div>المقر: <span style="color:var(--text-main); font-weight:700;">${selectedInstructor.regionName || selectedInstructor.region}</span></div>
+                        <div>سعر الحصة: <span style="color:${customColor}; font-weight:800; font-size:1.05rem;">${selectedInstructor.price}</span></div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 1.02rem; font-weight: 800; margin-bottom: 12px;">⏰ الأوقات الفارغة المتاحة للحجز واللقاء الأولي:</h3>
+                    <div class="slots-container-grid">${slotsHTML}</div>
+                </div>
+            `;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectSlotForBooking(slotId) {
+            targetedSlotObj = selectedInstructor.slots.find(s => s.id === slotId);
+            document.getElementById("bookingModalSub").innerText = `حجز لقاء أولي وموعد (${targetedSlotObj.text}) مع المدرب ${selectedInstructor.name}`;
+            openIosModal('bookingModal');
+        }
+
+        function submitStudentBooking(e) {
+            e.preventDefault();
+            const studentName = document.getElementById("bookInputName").value;
+            const studentPhone = document.getElementById("bookInputPhone").value;
+            const toriaFileInput = document.getElementById("bookInputToria").files[0];
+            const toriaFileName = toriaFileInput ? toriaFileInput.name : "تم إرفاق الملف";
+
+            targetedSlotObj.booked = true;
+            localStorage.setItem('drivepro_app_active', JSON.stringify(activeInstructors));
+
+            const msgText = `مرحباً الأستاذ ${selectedInstructor.name}، لقد قمت بحجز موعد لقاء أولي معك عبر تطبيق DrivePro:\n👤 اسم الطالب: ${studentName}\n📞 هاتف الطالب: ${studentPhone}\n⏰ الموعد: ${targetedSlotObj.text}\n📎 ملف التوريا المرفق: ${toriaFileName}`;
+            const whatsappLink = `https://wa.me/${selectedInstructor.phone}?text=${encodeURIComponent(msgText)}`;
+            
+            window.open(whatsappLink, '_blank');
+            alert(`✅ تم تأكيد الحجز وفتح الواتساب بنجاح!`);
+            
+            closeIosModal('bookingModal');
+            openInstructorProfile(selectedInstructor.id);
+        }
+
+        function openIosModal(modalId) { document.getElementById(modalId).style.display = "flex"; }
+        function closeIosModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+
+        function submitNewTeacher(e) {
+            e.preventDefault();
+            const name = document.getElementById("regInputName").value;
+            const email = document.getElementById("regInputEmail").value;
+            let phone = document.getElementById("regInputPhone").value.trim();
+            const gender = document.getElementById("regInputGender").value;
+            const bio = document.getElementById("regInputBio").value;
+            const region = document.getElementById("regInputRegion").value;
+            const regionName = getArabicRegionLabel(region);
+            const price = document.getElementById("regInputPrice").value + " ₪";
+            const photoEl = document.getElementById("regInputPhoto");
+
+            if (phone.startsWith('0')) phone = '972' + phone.substring(1);
+
+            const generatedPass = "DP-" + Math.floor(1000 + Math.random() * 9000);
+
+            let photoBase64 = "";
+            if (photoEl.files && photoEl.files[0]) {
+                const readerObj = new FileReader();
+                readerObj.onload = function(evt) {
+                    photoBase64 = evt.target.result;
+                    saveNewReqToStorage(photoBase64, generatedPass);
+                };
+                readerObj.readAsDataURL(photoEl.files[0]);
+            } else {
+                saveNewReqToStorage("", generatedPass);
+            }
+
+            function saveNewReqToStorage(photoData, passwordCode) {
+                const newApplication = {
+                    id: Date.now(),
+                    name, email, pass: passwordCode, phone, gender, bio, region, regionName,
+                    zone: selectedAppZone,
+                    price,
+                    photo: photoData,
+                    customColor: "#0a84ff",
+                    customBg: "default",
+                    slots: []
+                };
+
+                pendingInstructors.push(newApplication);
+                localStorage.setItem('drivepro_app_pending', JSON.stringify(pendingInstructors));
+
+                document.getElementById("succEmail").innerText = email;
+                document.getElementById("succPass").innerText = passwordCode;
+
+                // إرسال تفاصيل الطلب وكلمة السر مباشرة عبر الواتساب للمعلم
+                const teacherWelcomeMsg = `مرحباً أستاذ ${name} 🚗\nتم استلام طلب انضمامك بنجاح إلى منصة DrivePro وهو الآن (قيد الانتظار) للمراجعة من قبل الإدارة.\n\nبيانات دخولك الخاصة للوحة التحكم عند الموافقة:\n📧 البريد: ${email}\n🔑 كلمة السر الخاصة: ${passwordCode}\n\nسنتواصل معك فور الموافقة!`;
+                const teacherWaLink = `https://wa.me/${phone}?text=${encodeURIComponent(teacherWelcomeMsg)}`;
+                window.open(teacherWaLink, '_blank');
+
+                closeIosModal('registerModal');
+                openIosModal('successRegModal');
+                e.target.reset();
+            }
+        }
+
+        function executeTeacherLogin(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById("loginInputEmail").value.trim();
+            const passInput = document.getElementById("loginInputPass").value.trim();
+
+            const matchTeacher = activeInstructors.find(t => t.email.toLowerCase() === emailInput.toLowerCase() && t.pass === passInput);
+            if (matchTeacher) {
+                currentLoggedInTeacher = matchTeacher;
+                closeIosModal('teacherLoginModal');
+                openTeacherPortal();
+            } else {
+                alert("❌ البريد الإلكتروني أو كلمة السر الخاصة خطأ!");
+            }
+        }
+
+        function openTeacherPortal() {
+            document.getElementById("homeRootView").style.display = "none";
+            document.getElementById("profilePageView").style.display = "none";
+            document.getElementById("adminPortalView").style.display = "none";
+            document.getElementById("teacherPortalView").style.display = "block";
+            document.getElementById("teacherPortalWelcome").innerText = `مرحباً بك: ${currentLoggedInTeacher.name}`;
+            
+            document.getElementById("teacherCustomColor").value = currentLoggedInTeacher.customColor || "#0a84ff";
+            document.getElementById("teacherCustomBg").value = currentLoggedInTeacher.customBg || "default";
+
+            renderTeacherPortalSlots();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateTeacherCustomization() {
+            if (!currentLoggedInTeacher) return;
+            currentLoggedInTeacher.customColor = document.getElementById("teacherCustomColor").value;
+            currentLoggedInTeacher.customBg = document.getElementById("teacherCustomBg").value;
+            localStorage.setItem('drivepro_app_active', JSON.stringify(activeInstructors));
+        }
+
+        function addTeacherSlotSmart() {
+            const dayText = appTranslations[currentAppLang].daysList[activePickerDay] || activePickerDay;
+            const fullSlotStr = `${dayText} - ${activePickerHour}`;
+            
+            if (!currentLoggedInTeacher.slots) currentLoggedInTeacher.slots = [];
+            
+            if (currentLoggedInTeacher.slots.some(s => s.text === fullSlotStr)) {
+                alert("⚠️ هذا الموعد مضاف مسبقاً!");
+                return;
+            }
+
+            currentLoggedInTeacher.slots.push({
+                id: Date.now(),
+                text: fullSlotStr,
+                booked: false
+            });
+
+            localStorage.setItem('drivepro_app_active', JSON.stringify(activeInstructors));
+            renderTeacherPortalSlots();
+            alert(`✅ تمت إضافة الموعد (${fullSlotStr}) بنجاح لتظهر للطلاب فوراً.`);
+        }
+
+        function renderTeacherPortalSlots() {
+            const listDiv = document.getElementById("teacherMySlotsList");
+            listDiv.innerHTML = "";
+            if (!currentLoggedInTeacher.slots || currentLoggedInTeacher.slots.length === 0) {
+                listDiv.innerHTML = `<p style="color:var(--text-muted); font-size:0.86rem;">ليس لديك مواعيد مضافة حالياً. استخدم الأداة بالأعلى لإضافة أوقاتك بكل راحة.</p>`;
+                return;
+            }
+            currentLoggedInTeacher.slots.forEach((s, index) => {
+                listDiv.innerHTML += `
+                    <div class="admin-row-item">
+                        <span style="font-size:0.88rem; font-weight:700;">${s.text} ${s.booked ? '<span style="color:var(--danger); font-size:0.78rem;">(محجوز من طالب)</span>' : '<span style="color:var(--success); font-size:0.78rem;">(فارغ ومتاح)</span>'}</span>
+                        <button class="ios-btn" onclick="removeTeacherSlot(${index})" style="color:var(--danger); border-color:var(--danger); font-size:0.75rem; padding:6px 12px;">حذف الموعد</button>
+                    </div>
+                `;
+            });
+        }
+
+        function removeTeacherSlot(index) {
+            currentLoggedInTeacher.slots.splice(index, 1);
+            localStorage.setItem('drivepro_app_active', JSON.stringify(activeInstructors));
+            renderTeacherPortalSlots();
+        }
+
+        function getArabicRegionLabel(regCode) {
+            const allRegionsArr = [...appRegionsData.south, ...appRegionsData.north];
+            const foundReg = allRegionsArr.find(r => r.id === regCode);
+            return foundReg ? foundReg.nameAr : regCode;
+        }
+    </script>
+</body>
+</html>
