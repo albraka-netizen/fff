@@ -63,7 +63,6 @@
             padding: 0;
         }
 
-        /* تحويل الحاوية لملء الشاشة بالكامل بشكل متجاوب */
         .device-frame {
             width: 100%;
             min-height: 100vh;
@@ -77,7 +76,6 @@
             transition: var(--smooth-transition);
         }
 
-        /* إخفاء شريط الحالة الخاص بالهاتف العلوي والسفلي ليتناسب مع الشاشات الواسعة */
         .status-bar, .home-indicator {
             display: none !important;
         }
@@ -632,7 +630,7 @@
         <div class="native-modal-content">
             <button class="close-ios-btn" onclick="closeNativeModal('registerModal')">✕</button>
             <h2 id="modalRegTitle" style="font-size: 1.35rem; font-weight: 900; margin-bottom: 8px;">انضم كمدرب سياقة</h2>
-            <p id="modalRegSub" style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">سجل بياناتك وانضم لنظام المدربين فوراً (تفعيل سنوي عبر Apple Pay / Google Pay).</p>
+            <p id="modalRegSub" style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">سجل بياناتك وانضم لنظام المدربين واسترخِ.</p>
             
             <form onsubmit="submitNewTeacherWithPayment(event)">
                 <div class="input-group">
@@ -666,11 +664,22 @@
                     <label id="regLblPrice">سعر الحصة (₪)</label>
                     <input type="text" id="regInputPrice" required placeholder="140">
                 </div>
-                <div style="background:var(--app-bg); border:1px solid var(--border-glass); padding:14px; border-radius:12px; text-align:center; margin-bottom:16px;">
-                    <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">رسوم الاشتراك والانضمام السنوي:</span>
-                    <strong style="font-size:1.2rem; color:var(--accent-blue);">50.00 $</strong>
+
+                <!-- خيارات الاشتراكات الجديدة -->
+                <div class="input-group">
+                    <label id="regLblPlan">نوع الاشتراك</label>
+                    <select id="regInputPlan" onchange="handleSubscriptionPlanChange(this.value)">
+                        <option value="monthly">اشتراك شهري (مجاني 0 ₪)</option>
+                        <option value="yearly">اشتراك سنوي (99 ₪)</option>
+                    </select>
                 </div>
-                <button type="submit" class="submit-btn-native" id="regSubmitBtn" style="background: linear-gradient(135deg, #30d158 0%, #208b3a 100%);">💳 الدفع السريع عبر Apple Pay / Google Pay</button>
+
+                <div id="planPriceDisplay" style="background:var(--app-bg); border:1px solid var(--border-glass); padding:14px; border-radius:12px; text-align:center; margin-bottom:16px;">
+                    <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">إجمالي تكلفة الاشتراك:</span>
+                    <strong id="planPriceText" style="font-size:1.2rem; color:#30d158;">مجاناً (0 ₪)</strong>
+                </div>
+
+                <button type="submit" class="submit-btn-native" id="regSubmitBtn" style="background: var(--accent-gradient);">إتمام التسجيل</button>
             </form>
         </div>
     </div>
@@ -761,7 +770,7 @@
             },
             he: {
                 heroTitle: "בחר את מור/ה הנהיגה שלך וצא לדרך בביטחון",
-                heroSub: "דפדף بين المدריכים המוبيלים, צפה بزמנים פנויים להזמנות وקבע שיעור בקלות.",
+                heroSub: "דפדף בין المدריכים המוبيלים, צפה بزמנים פנויים להזמנות وקבע שיעור בקלות.",
                 searchPlaceholder: "חיפוש חכם לפי שמות أو שפות (عربي / English / עברית)...",
                 allRegions: "כל האזורים",
                 allTeachers: "כל المורים",
@@ -909,6 +918,7 @@
                 photo: "",
                 customColor: "#0a84ff",
                 customBg: "default",
+                subscriptionPlan: "monthly",
                 slots: [
                     { id: 101, text: "الأحد - 16:00", booked: false },
                     { id: 102, text: "الثلاثاء - 17:30", booked: false }
@@ -1122,90 +1132,120 @@
         function openNativeModal(modalId) { document.getElementById(modalId).style.display = "flex"; }
         function closeNativeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
 
+        function handleSubscriptionPlanChange(planType) {
+            const priceText = document.getElementById("planPriceText");
+            const submitBtn = document.getElementById("regSubmitBtn");
+            
+            if (planType === 'yearly') {
+                priceText.innerText = "99.00 ₪";
+                priceText.style.color = "var(--accent-blue)";
+                submitBtn.innerText = "💳 الدفع الآمن عبر Google Pay (99 ₪)";
+                submitBtn.style.background = "linear-gradient(135deg, #30d158 0%, #208b3a 100%)";
+            } else {
+                priceText.innerText = "مجاناً (0 ₪)";
+                priceText.style.color = "#30d158";
+                submitBtn.innerText = "🚀 إتمام التسجيل المجاني";
+                submitBtn.style.background = "var(--accent-gradient)";
+            }
+        }
+
         async function submitNewTeacherWithPayment(e) {
             e.preventDefault();
 
-            if (!window.google || !google.payments || !google.payments.api) {
-                showCustomAlert("خطأ في الاتصال", "تعذر الاتصال ببوابة الدفع الآمنة لـ Google Pay. تأكد من اتصال الإنترنت.", "❌");
-                return;
-            }
+            const planType = document.getElementById("regInputPlan").value;
 
-            const paymentsClient = new google.payments.api.PaymentsClient({
-                environment: 'PRODUCTION'
-            });
-
-            const paymentDataRequest = {
-                apiVersion: 2,
-                apiVersionMinor: 0,
-                allowedPaymentMethods: [{
-                    type: 'CARD',
-                    parameters: {
-                        allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-                        allowedCardNetworks: ['MASTERCARD', 'VISA']
-                    },
-                    tokenizationSpecification: {
-                        type: 'PAYMENT_GATEWAY',
-                        parameters: {
-                            'gateway': 'example',
-                            'gatewayMerchantId': 'exampleGatewayMerchantId'
-                        }
-                    }
-                }],
-                merchantInfo: {
-                    merchantId: '01234567890123456789',
-                    merchantName: 'DrivePro Driving Elite System'
-                },
-                transactionInfo: {
-                    totalPriceStatus: 'FINAL',
-                    totalPrice: '50.00',
-                    currencyCode: 'USD',
-                    countryCode: 'US'
+            // تفعيل نظام الدفع عبر Google Pay فقط في حال اختيار الاشتراك السنوي
+            if (planType === 'yearly') {
+                if (!window.google || !google.payments || !google.payments.api) {
+                    showCustomAlert("خطأ في الاتصال", "تعذر الاتصال ببوابة الدفع لـ Google Pay. تأكد من اتصال الإنترنت.", "❌");
+                    return;
                 }
-            };
 
-            try {
-                const paymentData = await paymentsClient.loadPaymentData(paymentDataRequest);
-                
-                const name = document.getElementById("regInputName").value;
-                const email = document.getElementById("regInputEmail").value.trim();
-                const pass = document.getElementById("regInputPass").value.trim();
-                let phone = document.getElementById("regInputPhone").value.trim();
-                const gender = document.getElementById("regInputGender").value;
-                const region = document.getElementById("regInputRegion").value;
-                const regionName = getArabicRegionLabel(region);
-                const price = document.getElementById("regInputPrice").value + " ₪";
+                const paymentsClient = new google.payments.api.PaymentsClient({
+                    environment: 'PRODUCTION'
+                });
 
-                if (phone.startsWith('0')) phone = '972' + phone.substring(1);
-
-                const newTeacherObj = {
-                    id: Date.now(),
-                    name, email, pass, phone, gender,
-                    bio: "مدرب قيادة معتمد وجاهز لتدريبك.",
-                    waze: "",
-                    facebook: "",
-                    region, regionName,
-                    zone: selectedAppZone,
-                    price,
-                    photo: "",
-                    customColor: "#0a84ff",
-                    customBg: "default",
-                    slots: []
+                const paymentDataRequest = {
+                    apiVersion: 2,
+                    apiVersionMinor: 0,
+                    allowedPaymentMethods: [{
+                        type: 'CARD',
+                        parameters: {
+                            allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                            allowedCardNetworks: ['MASTERCARD', 'VISA']
+                        },
+                        tokenizationSpecification: {
+                            type: 'PAYMENT_GATEWAY',
+                            parameters: {
+                                'gateway': 'example',
+                                'gatewayMerchantId': 'exampleGatewayMerchantId'
+                            }
+                        }
+                    }],
+                    merchantInfo: {
+                        merchantId: '01234567890123456789',
+                        merchantName: 'DrivePro Driving Elite System'
+                    },
+                    transactionInfo: {
+                        totalPriceStatus: 'FINAL',
+                        totalPrice: '99.00',
+                        currencyCode: 'ILS',
+                        countryCode: 'IL'
+                    }
                 };
 
-                activeInstructors.push(newTeacherObj);
-                localStorage.setItem('drivepro_native_active', JSON.stringify(activeInstructors));
-                currentLoggedInTeacher = newTeacherObj;
-                closeNativeModal('registerModal');
-                e.target.reset();
-                openTeacherPortal();
-                showCustomAlert("تم الدفع والتسجيل بنجاح! 💳", `أهلاً بك يا أستاذ ${name}، تم اعتماد الدفع السنوي الحقيقي بنجاح وتوجيهك لإدارة جدول مواعيدك.`, "🚀");
-
-            } catch (err) {
-                if (err.statusCode !== 'CANCELED') {
-                    console.error("Payment Error:", err);
-                    showCustomAlert("فشل الدفع", "حدث خطأ أثناء معالجة الدفع عبر البطاقة الحقيقية. تأكد من صلاحية البطاقة ورصيد الحساب.", "⚠️");
+                try {
+                    await paymentsClient.loadPaymentData(paymentDataRequest);
+                } catch (err) {
+                    if (err.statusCode !== 'CANCELED') {
+                        console.error("Payment Error:", err);
+                        showCustomAlert("فشل الدفع", "حدث خطأ أثناء معالجة عملية الدفع عبر البطاقة.", "⚠️");
+                        return;
+                    } else {
+                        return; // المستخدم ألغى عملية الدفع
+                    }
                 }
             }
+
+            const name = document.getElementById("regInputName").value;
+            const email = document.getElementById("regInputEmail").value.trim();
+            const pass = document.getElementById("regInputPass").value.trim();
+            let phone = document.getElementById("regInputPhone").value.trim();
+            const gender = document.getElementById("regInputGender").value;
+            const region = document.getElementById("regInputRegion").value;
+            const regionName = getArabicRegionLabel(region);
+            const price = document.getElementById("regInputPrice").value + " ₪";
+
+            if (phone.startsWith('0')) phone = '972' + phone.substring(1);
+
+            const newTeacherObj = {
+                id: Date.now(),
+                name, email, pass, phone, gender,
+                bio: "مدرب قيادة معتمد وجاهز لتدريبك.",
+                waze: "",
+                facebook: "",
+                region, regionName,
+                zone: selectedAppZone,
+                price,
+                subscriptionPlan: planType,
+                photo: "",
+                customColor: "#0a84ff",
+                customBg: "default",
+                slots: []
+            };
+
+            activeInstructors.push(newTeacherObj);
+            localStorage.setItem('drivepro_native_active', JSON.stringify(activeInstructors));
+            currentLoggedInTeacher = newTeacherObj;
+            closeNativeModal('registerModal');
+            e.target.reset();
+            openTeacherPortal();
+
+            const successMsg = planType === 'yearly' 
+                ? `أهلاً بك يا أستاذ ${name}، تم تفعيل الاشتراك السنوي بنجاح بقيمة 99 شيكل.` 
+                : `أهلاً بك يا أستاذ ${name}، تم تفعيل اشتراكك الشهري المجاني بنجاح.`;
+
+            showCustomAlert("تم التسجيل بنجاح! 🎉", successMsg, "🚀");
         }
 
         function executeTeacherLogin(e) {
